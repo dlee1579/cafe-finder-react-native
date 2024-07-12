@@ -1,12 +1,14 @@
 import CafeTile from "@/components/CafeTile";
 import NavigationBar from "@/components/NavigationBar";
-import { useNavigation } from "@react-navigation/native";
+import { ParamListBase, useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { SafeAreaView, ScrollView, Text, TextInput, View, Image, StyleSheet } from "react-native";
-
+import { SafeAreaView, ScrollView, Text, TextInput, View, Image, StyleSheet, Pressable } from "react-native";
+import { getAllCafes } from '../api-service';
+import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
+import * as SecureStore from 'expo-secure-store';
 
 export function Home() {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
     type Cafe = {
         id: string,
         name: string,
@@ -20,28 +22,35 @@ export function Home() {
         is_pet_friendly: boolean,
         thumbnail_image_location: string | null,
     }
-    const [cafes, setCafes] = useState(Array<Cafe>)
+    const [cafes, setCafes] = useState(Array<Cafe>);
     const getCafes = async () => {
-        try {
-            const response = await fetch("http://127.0.0.1:8000/cafe/api/cafes/");
-            const json = await response.json();
-            setCafes(json);
-        } catch (error) {
-            console.error(error);
-        }
+        const token = await SecureStore.getItemAsync("token");
+        setCafes(await getAllCafes(token))
     }
     useEffect(() => {
         getCafes();
     }, [])
     function onSearchSubmit() {
-        console.log("search submitted");
+        // console.log("search submitted");
     }
 
     const styles = StyleSheet.create({
         wrapper: {
             flex: 1,
             backgroundColor: "rgb(207, 182, 157)",
-            paddingTop: 30,
+            paddingTop: 60,
+        },
+        cafeSection: {
+            flexDirection: "row",
+            // justifyContent: "flex-end",
+            paddingVertical: 30,
+            alignItems: "center",
+            textAlignVertical: 'center',
+        },
+        addCafe: {
+            right: 10,
+            position: 'absolute',
+            // alignSelf: "flex-end",
         },
         textInput: {
             backgroundColor: "white",
@@ -51,7 +60,7 @@ export function Home() {
             alignSelf: "center",
         },
         text: {
-            marginTop: 50,
+            // marginTop: 50,
             textAlign: 'left',
             fontSize: 24,
             fontWeight: "bold",
@@ -64,7 +73,11 @@ export function Home() {
             marginHorizontal: 0,
         },
     })
-
+    const handleCafeTilePress = (cafeId: string) => {
+        navigation.navigate("Cafe", {
+            cafeId: cafeId,
+        });
+    }
 
     return <>
         <View
@@ -75,20 +88,28 @@ export function Home() {
                 style={styles.textInput}
                 onSubmitEditing={onSearchSubmit}
             />
-            <Text
-                style={styles.text}
-            >Cafes near you</Text>
+            <View style={styles.cafeSection}>
+                <Text style={styles.text}>Cafes near you</Text>
+                <Pressable style={styles.addCafe}>
+                    <Image source={require("../assets/images/add-circle--button-remove-cross-add-buttons-plus-circle-+-mathematics-math.png")} />
+                </Pressable>
+            </View>
             <SafeAreaView>
                 <ScrollView
                 style={styles.scrollView}
                 >
-                    {cafes.map((cafe) => (
-                            <CafeTile
-                                key={cafe.id}
-                                name={cafe.name}
-                                neighborhood={cafe.neighborhood}
-                                thumbnail_image_location={cafe.thumbnail_image_location}
-                            />
+                    {cafes.map((cafe, index) => (
+                            <Pressable
+                                onPress={()=>handleCafeTilePress(cafe.id)}
+                                key={index}
+                            >
+                                <CafeTile
+                                    key={cafe.id}
+                                    name={cafe.name}
+                                    neighborhood={cafe.neighborhood}
+                                    thumbnail_image_location={cafe.thumbnail_image_location}
+                                />
+                            </Pressable>
                     ))}
                 </ScrollView>
             </SafeAreaView>

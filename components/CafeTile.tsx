@@ -17,7 +17,6 @@ interface CafeTile {
 
 export default function CafeTile(cafe: CafeTile){
     // const {cafe} = props;
-    console.log(cafe);
     const thumbnailPath = '../assets/images/'+cafe.thumbnail_image_location;
 
     return <>

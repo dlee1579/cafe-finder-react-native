@@ -14,6 +14,7 @@ export default function NavigationBar() {
             justifyContent: 'space-around', 
             position: 'absolute',
             bottom: 0,
+            backgroundColor: "rgb(207, 182, 157)",
         },
         text: {
             fontSize: 16,
@@ -23,7 +24,6 @@ export default function NavigationBar() {
         },
         tabs: {
             justifyContent: 'center',
-            // width: "33%"
         },
         icon: {
             alignSelf: 'center',
@@ -31,7 +31,6 @@ export default function NavigationBar() {
         }
     });
     const handlePress = (pageName: string) => {
-        console.log(pageName);
         navigation.navigate(pageName);
     }
 
